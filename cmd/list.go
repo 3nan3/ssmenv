@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"github.com/spf13/cobra"
 	"github.com/3nan3/ssmenv/paramstore"
@@ -17,9 +16,7 @@ var listCmd = &cobra.Command{
 			cmd.Println(err)
 			os.Exit(1)
 		}
-		for name, value := range envs {
-			fmt.Printf("%s='%s'\n", name, value)
-		}
+		envs.Print()
 	},
 }
 
