@@ -11,7 +11,7 @@ var getCmd = &cobra.Command{
 	Short: "",
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		client := paramstore.New("/dotenv/development")			
+		client := paramstore.New(getPath())
 		envs, err := client.GetEnv(args[0])
 		if err != nil {
 			cmd.Println(err)

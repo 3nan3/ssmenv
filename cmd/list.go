@@ -10,7 +10,7 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "",
 	Run: func(cmd *cobra.Command, args []string) {
-		client := paramstore.New("/dotenv/development")			
+		client := paramstore.New(getPath())
 		envs, err := client.GetEnvs()
 		if err != nil {
 			cmd.Println(err)
