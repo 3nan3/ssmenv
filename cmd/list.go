@@ -16,7 +16,11 @@ var listCmd = &cobra.Command{
 			cmd.Println(err)
 			os.Exit(1)
 		}
-		envs.Print()
+
+		err = envs.Stdout(); if err != nil {
+			cmd.Println(err)
+			os.Exit(1)
+		}
 	},
 }
 
