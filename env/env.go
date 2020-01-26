@@ -29,6 +29,12 @@ func (env *Env) Stdout() error {
 	return env.print(os.Stdout)
 }
 
+func (env *Env) ApplyEnv() {
+	for name, value := range env.envs {
+		os.Setenv(name, value)
+	}
+}
+
 func (env *Env) print(io io.Writer) error {
 	for name, value := range env.envs {
 		escapedValue, err := escapeValue(value); if err != nil {
