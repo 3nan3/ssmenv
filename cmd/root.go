@@ -6,13 +6,8 @@ import (
 )
 
 var rootCmd = &cobra.Command {
-	Use:   "ssmenv <command>",
-	Short: "",
-	Args: cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Println("run")
-		os.Exit(0)
-	},
+	Use:   "ssmenv",
+	Short: "Use keys and values of AWS SSM Parameter Store as environment variables",
 }
 var path string
 

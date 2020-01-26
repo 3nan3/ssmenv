@@ -8,17 +8,17 @@ import (
 
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "",
+	Short: "Display list of environment variables",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := paramstore.New(getPath())
 		envs, err := client.GetEnvs()
 		if err != nil {
-			cmd.Println(err)
+			cmd.PrintErrln(err)
 			os.Exit(1)
 		}
 
 		err = envs.Stdout(); if err != nil {
-			cmd.Println(err)
+			cmd.PrintErrln(err)
 			os.Exit(1)
 		}
 	},
