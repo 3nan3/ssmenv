@@ -47,6 +47,26 @@ func (ps *ParameterStore) GetEnvs() (*env.Env, error) {
 	return parameterToEnv(res.Parameters), nil
 }
 
+func (ps *ParameterStore) PutEnvs(envs *env.Env) (*env.Env, error) {
+	oldenvs, err := ps.GetEnvs()
+	if err != nil {
+		return nil, err
+	}
+	for name, value := range envs.GetEnvs() {
+		input := &ssm.PutParameterInput {
+			Name: aws.String(ps.parameterName(name)),
+			Overwrite: aws.Bool(true),
+			Type: aws.String("SecureString"),
+			Value: aws.String(value),
+		}
+		_, err := ps.svc.PutParameter(input)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return oldenvs, nil
+}
+
 func parameterToEnv(params []*ssm.Parameter) *env.Env {
 	envs := env.New()
 	for _, param := range params {
