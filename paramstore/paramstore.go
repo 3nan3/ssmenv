@@ -31,20 +31,36 @@ func (ps *ParameterStore) GetEnv(envName string) (*env.Env, error) {
 		return nil, err
 	}
 
-	return parameterToEnv([]*ssm.Parameter{res.Parameter}), nil
+	envs := env.New()
+	putParameters(envs, []*ssm.Parameter{res.Parameter})
+	return envs, nil
 }
 
 func (ps *ParameterStore) GetEnvs() (*env.Env, error) {
+	envs := env.New()
+
+	nextToken := ""
 	input := &ssm.GetParametersByPathInput {
 		Path: aws.String(ps.path),
 		WithDecryption: aws.Bool(true),
 	}
-	res, err := ps.svc.GetParametersByPath(input)
-	if err != nil {
-		return nil, err
-	}
 
-	return parameterToEnv(res.Parameters), nil
+	for {
+		if nextToken != "" {
+			input.SetNextToken(nextToken)
+		}
+		res, err := ps.svc.GetParametersByPath(input)
+		if err != nil {
+			return nil, err
+		}
+
+		putParameters(envs, res.Parameters)
+		if res.NextToken == nil {
+			break
+		}
+		nextToken = *res.NextToken
+	}
+	return envs, nil
 }
 
 func (ps *ParameterStore) PutEnvs(envs *env.Env) (*env.Env, error) {
@@ -67,12 +83,10 @@ func (ps *ParameterStore) PutEnvs(envs *env.Env) (*env.Env, error) {
 	return oldenvs, nil
 }
 
-func parameterToEnv(params []*ssm.Parameter) *env.Env {
-	envs := env.New()
+func putParameters(envs *env.Env, params []*ssm.Parameter) {
 	for _, param := range params {
 		envs.PutEnv(envName(*param.Name), *param.Value)
 	}
-	return envs
 }
 
 func (ps *ParameterStore) parameterName(envName string) string {
