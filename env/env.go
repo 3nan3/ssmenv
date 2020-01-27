@@ -17,6 +17,22 @@ func New() *Env {
 	return &Env{envs}
 }
 
+func PrintDiff(oldenv *Env, newenv *Env, diff string) {
+	for newk, newv := range newenv.envs {
+		oldv := oldenv.GetEnv(newk)
+		if oldv == "" || newv != oldv {
+			fmt.Printf("- key: %s\n", newk)
+			if diff == "all" {
+				fmt.Printf("  old_value: %s\n  new_value: %s\n", oldv, newv)
+			}
+		}
+	}
+}
+
+func (env *Env) GetEnvs() map[string]string {
+	return env.envs
+}
+
 func (env *Env) GetEnv(name string) string {
 	return env.envs[name]
 }
