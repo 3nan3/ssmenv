@@ -1,0 +1,11 @@
+#!/bin/bash
+list=(
+	"linux		amd64"
+	"darwin		amd64"
+)
+
+for row in "${list[@]}"
+do
+	os_arch=($row)
+	GOOS=${os_arch[0]} GOARCH=${os_arch[1]} go build -o ssmenv_${os_arch[0]}_${os_arch[1]} main.go
+done
