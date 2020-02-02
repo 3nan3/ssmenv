@@ -87,6 +87,16 @@ $ ssmenv run echo $SAMPLE_VALUE_1
 sapmle_value
 ```
 
+### Advanced Setting
+
+#### Empty value
+
+The value of Parameter Store require at least one character.
+Therefore, ssmenv judges that it is empty if it matches a specific string.
+```
+SSMENV_EMPTY_PATTERN=empty_value # default value is "🈳"
+```
+
 ## Inspired by
 
 - https://github.com/sachaos/s3env
