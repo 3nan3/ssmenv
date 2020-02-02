@@ -78,6 +78,24 @@ $ ssmenv put -f secret.env --diff=key
 - key: SAMPLE_CREDENTIAL
 ```
 
+#### ssmenv delete
+
+Delete environment variables.
+
+```sh
+$ ssmenv delete -e SAMPLE_VALUE_1 -e SAMPLE_VALUE_2
+
+$ ssmenv delete -e SAMPLE_VALUE_3 --dry-run
+- key: SAMPLE_VALUE_3
+  old_value: new_value
+  new_value:
+
+$ ssmenv delete -e SAMPLE_VALUE_3 --diff
+- key: SAMPLE_VALUE_3
+  old_value: new_value
+  new_value:
+```
+
 #### ssmenv run
 
 Command execution with applying environment variables.
