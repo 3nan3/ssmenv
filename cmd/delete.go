@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/3nan3/ssmenv/env"
 	"github.com/3nan3/ssmenv/paramstore"
+	"github.com/3nan3/ssmenv/util"
 )
 
 var deleteCmd = &cobra.Command{
@@ -14,7 +15,7 @@ var deleteCmd = &cobra.Command{
 	Args: func(cmd *cobra.Command, args []string) error {
 		if deleteDryrun {
 			deleteDiff = "all"
-		} else if !contains(deleteDiffs, deleteDiff) {
+		} else if !util.SliceContains(deleteDiffs, deleteDiff) {
 			return fmt.Errorf("hoge")
 		}
 		return nil

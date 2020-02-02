@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/3nan3/ssmenv/env"
 	"github.com/3nan3/ssmenv/paramstore"
+	"github.com/3nan3/ssmenv/util"
 )
 
 var putCmd = &cobra.Command{
@@ -15,7 +16,7 @@ var putCmd = &cobra.Command{
 	Args: func(cmd *cobra.Command, args []string) error {
 		if dryrun {
 			diff = "all"
-		} else if !contains(diffs, diff) {
+		} else if !util.SliceContains(diffs, diff) {
 			return fmt.Errorf("hoge")
 		}
 		return nil
@@ -77,13 +78,4 @@ func init() {
 	putCmd.Flags().Lookup("diff").NoOptDefVal = "all"
 
 	rootCmd.AddCommand(putCmd)
-}
-
-func contains(array []string, key string) bool {
-	for _, elem := range array {
-		if elem == key {
-			return true
-		}
-	}
-	return false
 }
