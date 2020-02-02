@@ -16,7 +16,7 @@ var deleteCmd = &cobra.Command{
 		if deleteDryrun {
 			deleteDiff = "all"
 		} else if !util.SliceContains(deleteDiffs, deleteDiff) {
-			return fmt.Errorf("hoge")
+			return fmt.Errorf("\"diff\" must be one of the following: %s", deleteDiffs)
 		}
 		return nil
 	},
@@ -61,9 +61,10 @@ var (
 )
 
 func init() {
-	deleteCmd.Flags().StringSliceVarP(&deleteEnvVars, "env", "e", []string{}, "Environment variable name to delete (e.g. '-e ENV_VAR')")
-	deleteCmd.Flags().BoolVar(&deleteDryrun, "dry-run", false, "Show differences and do nothing")
-	deleteCmd.Flags().StringVar(&deleteDiff, "diff", "no", "Show delete result (e.g. \"--diff\", \"--diff=key\" )")
+	deleteCmd.Flags().StringSliceVarP(&deleteEnvVars, "env", "e", []string{}, "environment variable name to delete")
+	deleteCmd.Flags().BoolVar(&deleteDryrun, "dry-run", false, "show differences and do nothing")
+	desc := fmt.Sprintf("show delete result (Select format: %s)", deleteDiffs)
+	deleteCmd.Flags().StringVar(&deleteDiff, "diff", "no", desc)
 	deleteCmd.Flags().Lookup("diff").NoOptDefVal = "all"
 
 	rootCmd.AddCommand(deleteCmd)

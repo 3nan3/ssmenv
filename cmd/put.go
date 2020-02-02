@@ -17,7 +17,7 @@ var putCmd = &cobra.Command{
 		if putDryrun {
 			putDiff = "all"
 		} else if !util.SliceContains(putDiffs, putDiff) {
-			return fmt.Errorf("hoge")
+			return fmt.Errorf("\"diff\" must be one of the following: %s", deleteDiffs)
 		}
 		return nil
 	},
@@ -71,10 +71,11 @@ var (
 )
 
 func init() {
-	putCmd.Flags().StringSliceVarP(&putEnvVars, "env", "e", []string{}, "environment variable (e.g. '-e ENV_VAR=value')")
-	putCmd.Flags().StringSliceVarP(&putEnvFiles, "env-file", "f", []string{}, "dotenv file")
-	putCmd.Flags().BoolVar(&putDryrun, "dry-run", false, "")
-	putCmd.Flags().StringVar(&putDiff, "diff", "no", "")
+	putCmd.Flags().StringSliceVarP(&putEnvVars, "env", "e", []string{}, "a environment variable to put (e.g. '-e ENV_VAR=value')")
+	putCmd.Flags().StringSliceVarP(&putEnvFiles, "env-file", "f", []string{}, "dotenv file to put")
+	putCmd.Flags().BoolVar(&putDryrun, "dry-run", false, "show differences and do nothing")
+	desc := fmt.Sprintf("show delete result (Select format: %s)", deleteDiffs)
+	putCmd.Flags().StringVar(&putDiff, "diff", "no", desc)
 	putCmd.Flags().Lookup("diff").NoOptDefVal = "all"
 
 	rootCmd.AddCommand(putCmd)
