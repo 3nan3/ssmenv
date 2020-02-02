@@ -66,12 +66,12 @@ SAMPLE_VALUE_2="update value by file"
 
 $ ssmenv put -e SAMPLE_VALUE_3=new_value --dry-run
 - key: SAMPLE_VALUE_3
-  old_value:
+  old_value: <undefined>
   new_value: new_value
 
 $ ssmenv put -e SAMPLE_VALUE_3=new_value --diff
 - key: SAMPLE_VALUE_3
-  old_value:
+  old_value: <undefined>
   new_value: new_value
 
 $ ssmenv put -f secret.env --diff=key
@@ -88,12 +88,12 @@ $ ssmenv delete -e SAMPLE_VALUE_1 -e SAMPLE_VALUE_2
 $ ssmenv delete -e SAMPLE_VALUE_3 --dry-run
 - key: SAMPLE_VALUE_3
   old_value: new_value
-  new_value:
+  new_value: <undefined>
 
 $ ssmenv delete -e SAMPLE_VALUE_3 --diff
 - key: SAMPLE_VALUE_3
   old_value: new_value
-  new_value:
+  new_value: <undefined>
 ```
 
 #### ssmenv run
