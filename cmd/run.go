@@ -26,7 +26,7 @@ var runCmd = &cobra.Command{
 			os.Exit(0)
 		}
 
-		client := paramstore.New(getPath())
+		client := paramstore.New(getPath(), getEmptyPattern())
 		envs, err := client.GetEnvs()
 		if err != nil {
 			cmd.PrintErrln(err)

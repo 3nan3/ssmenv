@@ -10,6 +10,7 @@ var rootCmd = &cobra.Command {
 	Short: "Use keys and values of AWS SSM Parameter Store as environment variables",
 }
 var path string
+var emptyPattern string
 
 
 func Execute() {
@@ -21,4 +22,14 @@ func getPath() string {
 		path = os.Getenv("SSMENV_PATH")
 	}
 	return path
+}
+
+func getEmptyPattern() string {
+	if emptyPattern == "" {
+		emptyPattern = os.Getenv("SSMENV_EMPTY_PATTERN")
+		if emptyPattern == "" {
+			emptyPattern = "🈳"
+		}
+	}
+	return emptyPattern
 }

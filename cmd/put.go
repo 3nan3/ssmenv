@@ -39,7 +39,7 @@ var putCmd = &cobra.Command{
 		}
 
 		// put env variables
-		client := paramstore.New(getPath())
+		client := paramstore.New(getPath(), getEmptyPattern())
 		var oldenvs *env.Env
 		if !dryrun {
 			oldenvs, err = client.PutEnvs(envs)

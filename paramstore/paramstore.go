@@ -10,15 +10,16 @@ import (
 )
 
 type ParameterStore struct {
-	path string	
+	path string
+	emptyPattern string
 	sess *session.Session
 	svc  ssmiface.SSMAPI
 }
 
-func New(path string) *ParameterStore {
+func New(path string, emptyPattern string) *ParameterStore {
 	sess := session.New()
 	svc := ssm.New(sess)
-	return &ParameterStore{path, sess, svc}
+	return &ParameterStore{path, emptyPattern, sess, svc}
 }
 
 func (ps *ParameterStore) GetEnv(envName string) (*env.Env, error) {
@@ -32,7 +33,7 @@ func (ps *ParameterStore) GetEnv(envName string) (*env.Env, error) {
 	}
 
 	envs := env.New()
-	putParameters(envs, []*ssm.Parameter{res.Parameter})
+	ps.putParameters(envs, []*ssm.Parameter{res.Parameter})
 	return envs, nil
 }
 
@@ -54,7 +55,7 @@ func (ps *ParameterStore) GetEnvs() (*env.Env, error) {
 			return nil, err
 		}
 
-		putParameters(envs, res.Parameters)
+		ps.putParameters(envs, res.Parameters)
 		if res.NextToken == nil {
 			break
 		}
@@ -69,6 +70,10 @@ func (ps *ParameterStore) PutEnvs(envs *env.Env) (*env.Env, error) {
 		return nil, err
 	}
 	for name, value := range envs.GetEnvs() {
+		if value == "" {
+			value = ps.emptyPattern
+		}
+
 		input := &ssm.PutParameterInput {
 			Name: aws.String(ps.parameterName(name)),
 			Overwrite: aws.Bool(true),
@@ -83,9 +88,13 @@ func (ps *ParameterStore) PutEnvs(envs *env.Env) (*env.Env, error) {
 	return oldenvs, nil
 }
 
-func putParameters(envs *env.Env, params []*ssm.Parameter) {
+func (ps *ParameterStore) putParameters(envs *env.Env, params []*ssm.Parameter) {
 	for _, param := range params {
-		envs.PutEnv(envName(*param.Name), *param.Value)
+		if *param.Value == ps.emptyPattern {
+			envs.PutEnv(envName(*param.Name), "")
+		} else {
+			envs.PutEnv(envName(*param.Name), *param.Value)
+		}
 	}
 }
 
