@@ -10,7 +10,7 @@ var listCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Display list of environment variables",
 	Run: func(cmd *cobra.Command, args []string) {
-		client := paramstore.New(getPath())
+		client := paramstore.New(getPath(), getEmptyPattern())
 		envs, err := client.GetEnvs()
 		if err != nil {
 			cmd.PrintErrln(err)

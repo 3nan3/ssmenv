@@ -18,7 +18,7 @@ var getCmd = &cobra.Command{
 	},
 	DisableFlagsInUseLine: true,
 	Run: func(cmd *cobra.Command, args []string) {
-		client := paramstore.New(getPath())
+		client := paramstore.New(getPath(), getEmptyPattern())
 		envs, err := client.GetEnv(args[0])
 		if err != nil {
 			cmd.PrintErrln(err)
