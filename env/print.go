@@ -20,7 +20,7 @@ func PrintDiff(oldenv *Env, newenv *Env, diff string) {
 		if newv != oldv {
 			fmt.Printf("- key: %s\n", name)
 			if diff == "all" {
-				fmt.Printf("  old_value: %s\n  new_value: %s\n", forPrintValue(oldv), forPrintValue(newv))
+				fmt.Printf("  old_value: %s\n  new_value: %s\n", toDiffValue(oldv), toDiffValue(newv))
 			}
 		}
 	}
@@ -28,11 +28,11 @@ func PrintDiff(oldenv *Env, newenv *Env, diff string) {
 
 func (env *Env) print(io io.Writer) error {
 	for _, name := range env.sortedName() {
-		escapedValue, err := escapeValue(env.GetEnv(name)); if err != nil {
+		escaped, err := toEnvValue(env.GetEnv(name)); if err != nil {
 			return err
 		}
 
-		_, err = fmt.Fprintf(io, "%s=%s\n", name, forPrintValue(escapedValue)); if err != nil {
+		_, err = fmt.Fprintf(io, "%s=%s\n", name, escaped); if err != nil {
 			return err
 		}
 	}
@@ -50,7 +50,7 @@ func (env *Env) sortedName() []string {
 	return names
 }
 
-func escapeValue(value *string) (*string, error) {
+func toEnvValue(value *string) (*string, error) {
 	if value == nil {
 		return nil, nil
 	}
@@ -91,7 +91,7 @@ func valueNeedsQuotes(value string) bool {
 	return strings.ContainsAny(value, " =\\\"\r\n")
 }
 
-func forDiffValue(str *string) string {
+func toDiffValue(str *string) string {
 	if str == nil {
 		return "<undefined>"
 	}
