@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"bytes"
 	"sort"
 )
 
@@ -49,9 +50,55 @@ func (env *Env) sortedName() []string {
 	return names
 }
 
-func forPrintValue(str *string) string {
+func escapeValue(value *string) (*string, error) {
+	if value == nil {
+		return nil, nil
+	}
+	if !valueNeedsQuotes(*value) {
+		return value, nil
+	}
+
+	escaped := bytes.NewBufferString("\"")
+	for len(*value) > 0 {
+		i := strings.IndexAny(*value, "\"\r\n")
+		if i < 0 {
+			i = len(*value)
+		}
+
+		if _, err := fmt.Fprint(escaped, (*value)[:i]); err != nil {
+			return cloneString(""), err
+		}
+		value = cloneString((*value)[i:])
+
+		if len(*value) > 0 {
+			var err error
+			switch (*value)[0] {
+			case '"':
+				_, err = fmt.Fprint(escaped, `\"`)
+			case '\n', '\r':
+				_, err = fmt.Fprint(escaped, "\n")
+			}
+			value = cloneString((*value)[1:])
+			if err != nil {
+				return cloneString(""), err
+			}
+		}
+	}
+	return cloneString(escaped.String() + "\""), nil
+}
+
+func valueNeedsQuotes(value string) bool {
+	return strings.ContainsAny(value, " =\\\"\r\n")
+}
+
+func forDiffValue(str *string) string {
 	if str == nil {
 		return "<undefined>"
 	}
 	return *str
+}
+
+func cloneString(str string) *string {
+	clone := str
+	return &clone
 }
