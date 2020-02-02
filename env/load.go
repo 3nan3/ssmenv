@@ -30,9 +30,10 @@ func (env *Env) load(io io.Reader) error {
 		return err
 	}
 
-	rep := strings.NewReplacer("\n", "\\n")
+	replacer := strings.NewReplacer("\n", "\\n")
 	for name, value := range loaded {
-		env.PutEnv(name, rep.Replace(value))
+		rep := replacer.Replace(value)
+		env.PutEnv(name, &rep)
 	}
 	return nil
 }
