@@ -2,18 +2,33 @@ package cmd
 
 import (
 	"os"
+	"fmt"
 	"github.com/spf13/cobra"
 )
+
+const version = "v0.1.0"
 
 var rootCmd = &cobra.Command {
 	Use:   "ssmenv",
 	Short: "Use keys and values of AWS SSM Parameter Store as environment variables",
+	Run: func(cmd *cobra.Command, args []string) {
+		if rootVersion {
+			printVersion()
+		} else {
+			cmd.Help()
+		}
+	},
 }
-var path string
-var emptyPattern string
+var (
+	path string
+	emptyPattern string
 
+	rootVersion bool
+)
 
 func Execute() {
+	rootCmd.Flags().BoolVarP(&rootVersion, "version", "v", false, "show ssmenv version")
+
 	rootCmd.Execute()
 }
 
@@ -32,4 +47,8 @@ func getEmptyPattern() string {
 		}
 	}
 	return emptyPattern
+}
+
+func printVersion() {
+	fmt.Printf("ssmenv %s\n", version)
 }
