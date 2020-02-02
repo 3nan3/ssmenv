@@ -70,15 +70,16 @@ func (ps *ParameterStore) PutEnvs(envs *env.Env) (*env.Env, error) {
 		return nil, err
 	}
 	for name, value := range envs.GetEnvs() {
-		if value == "" {
-			value = ps.emptyPattern
+		if *value == "" {
+			empty := ps.emptyPattern
+			value = &empty
 		}
 
 		input := &ssm.PutParameterInput {
 			Name: aws.String(ps.parameterName(name)),
 			Overwrite: aws.Bool(true),
 			Type: aws.String("SecureString"),
-			Value: aws.String(value),
+			Value: aws.String(*value),
 		}
 		_, err := ps.svc.PutParameter(input)
 		if err != nil {
@@ -111,9 +112,10 @@ func (ps *ParameterStore) DeleteEnvs(names []string) ([]string, error) {
 func (ps *ParameterStore) putParameters(envs *env.Env, params []*ssm.Parameter) {
 	for _, param := range params {
 		if *param.Value == ps.emptyPattern {
-			envs.PutEnv(envName(*param.Name), "")
+			empty := ""
+			envs.PutEnv(envName(*param.Name), &empty)
 		} else {
-			envs.PutEnv(envName(*param.Name), *param.Value)
+			envs.PutEnv(envName(*param.Name), param.Value)
 		}
 	}
 }

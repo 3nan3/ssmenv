@@ -45,7 +45,7 @@ var deleteCmd = &cobra.Command{
 		if deleteDiff != "no" {
 			envs := env.New()
 			for _, name := range deleteEnvVars {
-				envs.PutEnv(name, "")
+				envs.PutEnv(name, nil)
 			}
 			env.PrintDiff(oldenvs, envs, deleteDiff)
 		}
