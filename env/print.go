@@ -50,12 +50,12 @@ func (env *Env) sortedName() []string {
 	return names
 }
 
-func toEnvValue(value *string) (*string, error) {
+func toEnvValue(value *string) (string, error) {
 	if value == nil {
-		return nil, nil
+		return "", nil
 	}
 	if !valueNeedsQuotes(*value) {
-		return value, nil
+		return *value, nil
 	}
 
 	escaped := bytes.NewBufferString("\"")
@@ -66,7 +66,7 @@ func toEnvValue(value *string) (*string, error) {
 		}
 
 		if _, err := fmt.Fprint(escaped, (*value)[:i]); err != nil {
-			return cloneString(""), err
+			return "", err
 		}
 		value = cloneString((*value)[i:])
 
@@ -80,11 +80,11 @@ func toEnvValue(value *string) (*string, error) {
 			}
 			value = cloneString((*value)[1:])
 			if err != nil {
-				return cloneString(""), err
+				return "", err
 			}
 		}
 	}
-	return cloneString(escaped.String() + "\""), nil
+	return escaped.String() + "\"", nil
 }
 
 func valueNeedsQuotes(value string) bool {
