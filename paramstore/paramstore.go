@@ -88,6 +88,26 @@ func (ps *ParameterStore) PutEnvs(envs *env.Env) (*env.Env, error) {
 	return oldenvs, nil
 }
 
+func (ps *ParameterStore) DeleteEnvs(names []string) ([]string, error) {
+	params := []string{}
+	for _, name := range names {
+		params = append(params, ps.parameterName(name))
+	}
+	input := &ssm.DeleteParametersInput {
+		Names: aws.StringSlice(params),
+	}
+
+	res, err := ps.svc.DeleteParameters(input)
+	if err != nil {
+		return nil, err
+	}
+	deleted := []string{}
+	for _, d := range res.DeletedParameters {
+		deleted = append(deleted, envName(*d))
+	}
+	return deleted, nil
+}
+
 func (ps *ParameterStore) putParameters(envs *env.Env, params []*ssm.Parameter) {
 	for _, param := range params {
 		if *param.Value == ps.emptyPattern {

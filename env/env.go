@@ -22,7 +22,7 @@ func PrintDiff(oldenv *Env, newenv *Env, diff string) {
 	for _, name := range newenv.sortedName() {
 		newv := newenv.GetEnv(name)
 		oldv := oldenv.GetEnv(name)
-		if oldv == "" || newv != oldv {
+		if newv != oldv {
 			fmt.Printf("- key: %s\n", name)
 			if diff == "all" {
 				fmt.Printf("  old_value: %s\n  new_value: %s\n", oldv, newv)
