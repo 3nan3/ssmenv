@@ -27,17 +27,13 @@ func TestToEnvValue(t *testing.T) {
 	}
 
 	for value, expected := range convertions {
-		actual, err := toEnvValue(&value)
-		if assert.Nil(t, err) {
-			assert.Equal(t, expected, actual, "Origin value: %s", value)
-		}
+		actual := toEnvValue(&value)
+		assert.Equal(t, expected, actual, "Origin value: %s", value)
 	}
 
 	// nil -> ""
-	actual, err := toEnvValue(nil)
-	if assert.Nil(t, err) {
-		assert.Equal(t, "", actual, "Origin value: %s", nil)
-	}
+	actual := toEnvValue(nil)
+	assert.Equal(t, "", actual, "Origin value: %s", nil)
 }
 
 func TestToDiffValue(t *testing.T) {

@@ -28,11 +28,8 @@ func PrintDiff(oldenv *Env, newenv *Env, diff string) {
 
 func (env *Env) print(io io.Writer) error {
 	for _, name := range env.sortedName() {
-		escaped, err := toEnvValue(env.GetEnv(name)); if err != nil {
-			return err
-		}
-
-		_, err = fmt.Fprintf(io, "%s=%s\n", name, escaped); if err != nil {
+		_, err := fmt.Fprintf(io, "%s=%s\n", name, toEnvValue(env.GetEnv(name)))
+		if err != nil {
 			return err
 		}
 	}
@@ -50,12 +47,12 @@ func (env *Env) sortedName() []string {
 	return names
 }
 
-func toEnvValue(value *string) (string, error) {
+func toEnvValue(value *string) string {
 	if value == nil {
-		return "", nil
+		return ""
 	}
 	if !valueNeedsEscape(*value) {
-		return *value, nil
+		return *value
 	}
 
 	var escaped bytes.Buffer
@@ -80,9 +77,9 @@ func toEnvValue(value *string) (string, error) {
 		}
 	}
 	if needsQuotes {
-		return `"` + escaped.String() + `"`, nil
+		return `"` + escaped.String() + `"`
 	} else {
-		return escaped.String(), nil
+		return escaped.String()
 	}
 }
 
