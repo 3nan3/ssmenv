@@ -45,3 +45,16 @@ func TestToDiffValue(t *testing.T) {
 	assert.Equal(t, "<undefined>", toDiffValue(nil))
 }
 
+func TestSortedName(t *testing.T) {
+	envs := New()
+	names := []string{"VAR_B", "VAR_A", "VAR_C"}
+	for _, n := range names {
+		envs.PutEnv(n, nil)
+	}
+
+	expecteds := []string{"VAR_A", "VAR_B", "VAR_C"}
+	actuals := envs.sortedName()
+	for i := 0; i < 3; i++ {
+		assert.Equal(t, expecteds[i], actuals[i])
+	}
+}
