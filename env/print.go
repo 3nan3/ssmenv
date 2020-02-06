@@ -54,41 +54,44 @@ func toEnvValue(value *string) (string, error) {
 	if value == nil {
 		return "", nil
 	}
-	if !valueNeedsQuotes(*value) {
+	if !valueNeedsEscape(*value) {
 		return *value, nil
 	}
 
-	escaped := bytes.NewBufferString("\"")
+	var escaped bytes.Buffer
+	needsQuotes := valueNeedsQuotes(*value)
 	for len(*value) > 0 {
 		i := strings.IndexAny(*value, "\"\r\n")
 		if i < 0 {
 			i = len(*value)
 		}
 
-		if _, err := fmt.Fprint(escaped, (*value)[:i]); err != nil {
-			return "", err
-		}
+		escaped.WriteString((*value)[:i])
 		value = cloneString((*value)[i:])
 
 		if len(*value) > 0 {
-			var err error
 			switch (*value)[0] {
 			case '"':
-				_, err = fmt.Fprint(escaped, `\"`)
+				escaped.WriteString(`\"`)
 			case '\n', '\r':
-				_, err = fmt.Fprint(escaped, "\n")
+				escaped.WriteString("\n")
 			}
 			value = cloneString((*value)[1:])
-			if err != nil {
-				return "", err
-			}
 		}
 	}
-	return escaped.String() + "\"", nil
+	if needsQuotes {
+		return `"` + escaped.String() + `"`, nil
+	} else {
+		return escaped.String(), nil
+	}
+}
+
+func valueNeedsEscape(value string) bool {
+	return strings.ContainsAny(value, " \r\n\"")
 }
 
 func valueNeedsQuotes(value string) bool {
-	return strings.ContainsAny(value, " =\\\"\r\n")
+	return strings.ContainsAny(value, " \r\n")
 }
 
 func toDiffValue(str *string) string {
