@@ -29,12 +29,12 @@ func (env *Env) printAll(io io.Writer) error {
 
 func printDiff(io io.Writer, oldenv *Env, newenv *Env, diff string) {
 	for _, name := range newenv.sortedName() {
-		newv := newenv.GetEnv(name)
-		oldv := oldenv.GetEnv(name)
+		newv := toDiffValue(newenv.GetEnv(name))
+		oldv := toDiffValue(oldenv.GetEnv(name))
 		if newv != oldv {
 			fmt.Fprintf(io, "- key: %s\n", name)
 			if diff == "all" {
-				fmt.Fprintf(io, "  old_value: %s\n  new_value: %s\n", toDiffValue(oldv), toDiffValue(newv))
+				fmt.Fprintf(io, "  old_value: %s\n  new_value: %s\n", oldv, newv)
 			}
 		}
 	}
