@@ -25,7 +25,7 @@ var getCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		err = envs.Stdout(); if err != nil {
+		err = envs.PrintAll(); if err != nil {
 			cmd.PrintErrln(err)
 			os.Exit(1)
 		}

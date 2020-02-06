@@ -9,35 +9,37 @@ import (
 	"sort"
 )
 
-func (env *Env) Stdout() error {
-	return env.print(os.Stdout)
+func (env *Env) PrintAll() error {
+	return env.printAll(os.Stdout)
 }
 
 func PrintDiff(oldenv *Env, newenv *Env, diff string) {
-	for _, name := range newenv.sortedName() {
-		newv := newenv.GetEnv(name)
-		oldv := oldenv.GetEnv(name)
-		if newv != oldv {
-			fmt.Printf("- key: %s\n", name)
-			if diff == "all" {
-				fmt.Printf("  old_value: %s\n  new_value: %s\n", toDiffValue(oldv), toDiffValue(newv))
-			}
-		}
-	}
+	printDiff(os.Stdout, oldenv, newenv, diff)
 }
 
-func (env *Env) print(io io.Writer) error {
+func (env *Env) printAll(io io.Writer) error {
 	for _, name := range env.sortedName() {
-		escaped, err := toEnvValue(env.GetEnv(name)); if err != nil {
-			return err
-		}
-
-		_, err = fmt.Fprintf(io, "%s=%s\n", name, escaped); if err != nil {
+		_, err := fmt.Fprintf(io, "%s=%s\n", name, toEnvValue(env.GetEnv(name)))
+		if err != nil {
 			return err
 		}
 	}
 	return nil
 }
+
+func printDiff(io io.Writer, oldenv *Env, newenv *Env, diff string) {
+	for _, name := range newenv.sortedName() {
+		newv := toDiffValue(newenv.GetEnv(name))
+		oldv := toDiffValue(oldenv.GetEnv(name))
+		if newv != oldv {
+			fmt.Fprintf(io, "- key: %s\n", name)
+			if diff == "all" {
+				fmt.Fprintf(io, "  old_value: %s\n  new_value: %s\n", oldv, newv)
+			}
+		}
+	}
+}
+
 
 func (env *Env) sortedName() []string {
 	names := []string{}
@@ -50,45 +52,48 @@ func (env *Env) sortedName() []string {
 	return names
 }
 
-func toEnvValue(value *string) (string, error) {
+func toEnvValue(value *string) string {
 	if value == nil {
-		return "", nil
+		return ""
 	}
-	if !valueNeedsQuotes(*value) {
-		return *value, nil
+	if !valueNeedsEscape(*value) {
+		return *value
 	}
 
-	escaped := bytes.NewBufferString("\"")
+	var escaped bytes.Buffer
+	needsQuotes := valueNeedsQuotes(*value)
 	for len(*value) > 0 {
 		i := strings.IndexAny(*value, "\"\r\n")
 		if i < 0 {
 			i = len(*value)
 		}
 
-		if _, err := fmt.Fprint(escaped, (*value)[:i]); err != nil {
-			return "", err
-		}
+		escaped.WriteString((*value)[:i])
 		value = cloneString((*value)[i:])
 
 		if len(*value) > 0 {
-			var err error
 			switch (*value)[0] {
 			case '"':
-				_, err = fmt.Fprint(escaped, `\"`)
+				escaped.WriteString(`\"`)
 			case '\n', '\r':
-				_, err = fmt.Fprint(escaped, "\n")
+				escaped.WriteString("\n")
 			}
 			value = cloneString((*value)[1:])
-			if err != nil {
-				return "", err
-			}
 		}
 	}
-	return escaped.String() + "\"", nil
+	if needsQuotes {
+		return `"` + escaped.String() + `"`
+	} else {
+		return escaped.String()
+	}
+}
+
+func valueNeedsEscape(value string) bool {
+	return strings.ContainsAny(value, " \r\n\"")
 }
 
 func valueNeedsQuotes(value string) bool {
-	return strings.ContainsAny(value, " =\\\"\r\n")
+	return strings.ContainsAny(value, " \r\n")
 }
 
 func toDiffValue(str *string) string {
