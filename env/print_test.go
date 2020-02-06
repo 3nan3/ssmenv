@@ -33,7 +33,7 @@ func TestToEnvValue(t *testing.T) {
 
 	// nil -> ""
 	actual := toEnvValue(nil)
-	assert.Equal(t, "", actual, "Origin value: %s", nil)
+	assert.Equal(t, "", actual, "Origin value: %s", "nil")
 }
 
 func TestToDiffValue(t *testing.T) {

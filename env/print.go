@@ -9,24 +9,15 @@ import (
 	"sort"
 )
 
-func (env *Env) Stdout() error {
-	return env.print(os.Stdout)
+func (env *Env) PrintAll() error {
+	return env.printAll(os.Stdout)
 }
 
 func PrintDiff(oldenv *Env, newenv *Env, diff string) {
-	for _, name := range newenv.sortedName() {
-		newv := newenv.GetEnv(name)
-		oldv := oldenv.GetEnv(name)
-		if newv != oldv {
-			fmt.Printf("- key: %s\n", name)
-			if diff == "all" {
-				fmt.Printf("  old_value: %s\n  new_value: %s\n", toDiffValue(oldv), toDiffValue(newv))
-			}
-		}
-	}
+	printDiff(os.Stdout, oldenv, newenv, diff)
 }
 
-func (env *Env) print(io io.Writer) error {
+func (env *Env) printAll(io io.Writer) error {
 	for _, name := range env.sortedName() {
 		_, err := fmt.Fprintf(io, "%s=%s\n", name, toEnvValue(env.GetEnv(name)))
 		if err != nil {
@@ -35,6 +26,20 @@ func (env *Env) print(io io.Writer) error {
 	}
 	return nil
 }
+
+func printDiff(io io.Writer, oldenv *Env, newenv *Env, diff string) {
+	for _, name := range newenv.sortedName() {
+		newv := newenv.GetEnv(name)
+		oldv := oldenv.GetEnv(name)
+		if newv != oldv {
+			fmt.Fprintf(io, "- key: %s\n", name)
+			if diff == "all" {
+				fmt.Fprintf(io, "  old_value: %s\n  new_value: %s\n", toDiffValue(oldv), toDiffValue(newv))
+			}
+		}
+	}
+}
+
 
 func (env *Env) sortedName() []string {
 	names := []string{}
