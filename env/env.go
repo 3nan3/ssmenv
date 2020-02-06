@@ -32,6 +32,8 @@ func (env *Env) PutEnv(name string, value *string) {
 
 func (env *Env) ApplyEnv() {
 	for name, value := range env.envs {
-		os.Setenv(name, *value)
+		if value != nil {
+			os.Setenv(name, *value)
+		}
 	}
 }
