@@ -9,17 +9,21 @@ import (
 	"sort"
 )
 
-func (env *Env) PrintAll() error {
-	return env.printAll(os.Stdout)
+func (env *Env) PrintAll(withExport bool) error {
+	return env.printAll(os.Stdout, withExport)
 }
 
 func PrintDiff(oldenv *Env, newenv *Env, diff string) {
 	printDiff(os.Stdout, oldenv, newenv, diff)
 }
 
-func (env *Env) printAll(io io.Writer) error {
+func (env *Env) printAll(io io.Writer, withExport bool) error {
+	export := ""
+	if withExport {
+		export = "export "
+	}
 	for _, name := range env.sortedName() {
-		_, err := fmt.Fprintf(io, "%s=%s\n", name, toEnvValue(env.GetEnv(name)))
+		_, err := fmt.Fprintf(io, "%s%s=%s\n", export, name, toEnvValue(env.GetEnv(name)))
 		if err != nil {
 			return err
 		}

@@ -17,13 +17,16 @@ var listCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		err = envs.PrintAll(); if err != nil {
+		err = envs.PrintAll(listExport); if err != nil {
 			cmd.PrintErrln(err)
 			os.Exit(1)
 		}
 	},
 }
+var listExport bool
 
 func init() {
+	listCmd.Flags().BoolVar(&listExport, "export", false, "print with export at the beginning")
+
 	rootCmd.AddCommand(listCmd)
 }
