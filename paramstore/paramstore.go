@@ -29,7 +29,12 @@ func (ps *ParameterStore) GetEnv(envName string) (*env.Env, error) {
 	}
 	res, err := ps.svc.GetParameter(input)
 	if err != nil {
-		return nil, err
+		switch err.(type) {
+		case *ssm.ParameterNotFound:
+			return env.New(), nil
+		default:
+			return nil, err
+		}
 	}
 
 	envs := env.New()
