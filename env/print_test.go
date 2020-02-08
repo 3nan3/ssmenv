@@ -24,7 +24,7 @@ func TestPrintAll(t *testing.T) {
 	}
 
 	io := bytes.NewBufferString("")
-	envs.printAll(io)
+	envs.printAll(io, false)
 
 	expected :=
 `VAR_A=value
@@ -37,6 +37,21 @@ VAR_E="{
   \"b\": \"ABC\nDEF\n\"
 }"
 VAR_F=
+`
+	assert.Equal(t, expected, io.String())
+}
+
+func TestPrintAllWithExport(t *testing.T) {
+	envs := New()
+	envs.PutEnv("VAR_A", toPtr("value_a"))
+	envs.PutEnv("VAR_B", toPtr("value_b"))
+
+	io := bytes.NewBufferString("")
+	envs.printAll(io, true)
+
+	expected :=
+`export VAR_A=value_a
+export VAR_B=value_b
 `
 	assert.Equal(t, expected, io.String())
 }
