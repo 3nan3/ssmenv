@@ -23,11 +23,13 @@ VAR_J=
 VAR_K={\n  "a": "v",\n  "b": "ABC\nDEF\n"\n}
 VAR_L="{\n  \"a\": \"v\",\n  \"b\": \"ABC\nDEF\n\"\n}"
 VAR_M=$VAR_A
-VAR_N='$VAR_A'
-VAR_O=$EXPORTED_VAR
-VAR_P=value
-VAR_P=override
-#VAR_Q=value
+VAR_N=${VAR_A}
+VAR_O='$VAR_A'
+VAR_P=\$VAR_A
+VAR_Q=$EXPORTED_VAR
+VAR_R=value
+VAR_R=override
+#VAR_S=value
 `	// NOTE not support multiline variable: https://github.com/joho/godotenv/issues/64
 
 	envs := New()
@@ -48,10 +50,12 @@ VAR_P=override
 		"VAR_K": toPtr(`{\n  "a": "v",\n  "b": "ABC\nDEF\n"\n}`),
 		"VAR_L": toPtr(`{\n  "a": "v",\n  "b": "ABC\nDEF\n"\n}`),
 		"VAR_M": toPtr(`value`),
-		"VAR_N": toPtr(`$VAR_A`),
-		"VAR_O": toPtr(``),
-		"VAR_P": toPtr(`override`),
-		"VAR_Q": nil,
+		"VAR_N": toPtr(`value`),
+		"VAR_O": toPtr(`$VAR_A`),
+		"VAR_P": toPtr(`$VAR_A`),
+		"VAR_Q": toPtr(``),
+		"VAR_R": toPtr(`override`),
+		"VAR_S": nil,
 	}
 	if assert.Nil(t, err) {
 		for name, actual := range envs.GetEnvs() {
