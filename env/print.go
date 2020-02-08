@@ -63,7 +63,7 @@ func toEnvValue(value *string) string {
 	var escaped bytes.Buffer
 	needsQuotes := valueNeedsQuotes(*value)
 	for len(*value) > 0 {
-		i := strings.IndexAny(*value, "\"\r\n")
+		i := strings.IndexAny(*value, "\"\r\n$")
 		if i < 0 {
 			i = len(*value)
 		}
@@ -75,6 +75,8 @@ func toEnvValue(value *string) string {
 			switch (*value)[0] {
 			case '"':
 				escaped.WriteString(`\"`)
+			case '$':
+				escaped.WriteString(`\$`)
 			case '\n', '\r':
 				escaped.WriteString("\n")
 			}
@@ -89,7 +91,7 @@ func toEnvValue(value *string) string {
 }
 
 func valueNeedsEscape(value string) bool {
-	return strings.ContainsAny(value, " \r\n\"")
+	return strings.ContainsAny(value, " \r\n\"$")
 }
 
 func valueNeedsQuotes(value string) bool {
