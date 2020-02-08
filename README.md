@@ -39,6 +39,10 @@ List environment variables.
 $ ssmenv list
 SAMPLE_VALUE_1=sapmle_value
 SAMPLE_VALUE_2="sapmle value"
+
+$ ssmenv list --export
+export SAMPLE_VALUE_1=sapmle_value
+export SAMPLE_VALUE_2="sapmle value"
 ```
 
 #### ssmenv put
