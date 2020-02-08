@@ -95,11 +95,11 @@ func toEnvValue(value *string) string {
 }
 
 func valueNeedsEscape(value string) bool {
-	return strings.ContainsAny(value, " \r\n\"$")
+	return strings.ContainsAny(value, " \r\n\"$#")
 }
 
 func valueNeedsQuotes(value string) bool {
-	return strings.ContainsAny(value, " \r\n")
+	return strings.ContainsAny(value, " \r\n#")
 }
 
 func toDiffValue(str *string) string {
