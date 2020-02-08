@@ -24,7 +24,7 @@ func New(path string, emptyPattern string) *ParameterStore {
 
 func (ps *ParameterStore) GetEnv(envName string) (*env.Env, error) {
 	input := &ssm.GetParameterInput {
-		Name: aws.String(ps.parameterName(envName)),
+		Name: aws.String(ps.nameWithPath(envName)),
 		WithDecryption: aws.Bool(true),
 	}
 	res, err := ps.svc.GetParameter(input)
@@ -33,7 +33,7 @@ func (ps *ParameterStore) GetEnv(envName string) (*env.Env, error) {
 	}
 
 	envs := env.New()
-	ps.putParameters(envs, []*ssm.Parameter{res.Parameter})
+	ps.putParamsInEnvs(envs, []*ssm.Parameter{res.Parameter})
 	return envs, nil
 }
 
@@ -55,7 +55,7 @@ func (ps *ParameterStore) GetEnvs() (*env.Env, error) {
 			return nil, err
 		}
 
-		ps.putParameters(envs, res.Parameters)
+		ps.putParamsInEnvs(envs, res.Parameters)
 		if res.NextToken == nil {
 			break
 		}
@@ -76,7 +76,7 @@ func (ps *ParameterStore) PutEnvs(envs *env.Env) (*env.Env, error) {
 		}
 
 		input := &ssm.PutParameterInput {
-			Name: aws.String(ps.parameterName(name)),
+			Name: aws.String(ps.nameWithPath(name)),
 			Overwrite: aws.Bool(true),
 			Type: aws.String("SecureString"),
 			Value: aws.String(*value),
@@ -92,7 +92,7 @@ func (ps *ParameterStore) PutEnvs(envs *env.Env) (*env.Env, error) {
 func (ps *ParameterStore) DeleteEnvs(names []string) ([]string, error) {
 	params := []string{}
 	for _, name := range names {
-		params = append(params, ps.parameterName(name))
+		params = append(params, ps.nameWithPath(name))
 	}
 	input := &ssm.DeleteParametersInput {
 		Names: aws.StringSlice(params),
@@ -104,26 +104,26 @@ func (ps *ParameterStore) DeleteEnvs(names []string) ([]string, error) {
 	}
 	deleted := []string{}
 	for _, d := range res.DeletedParameters {
-		deleted = append(deleted, envName(*d))
+		deleted = append(deleted, nameWithoutPath(*d))
 	}
 	return deleted, nil
 }
 
-func (ps *ParameterStore) putParameters(envs *env.Env, params []*ssm.Parameter) {
+func (ps *ParameterStore) putParamsInEnvs(envs *env.Env, params []*ssm.Parameter) {
 	for _, param := range params {
 		if *param.Value == ps.emptyPattern {
 			empty := ""
-			envs.PutEnv(envName(*param.Name), &empty)
+			envs.PutEnv(nameWithoutPath(*param.Name), &empty)
 		} else {
-			envs.PutEnv(envName(*param.Name), param.Value)
+			envs.PutEnv(nameWithoutPath(*param.Name), param.Value)
 		}
 	}
 }
 
-func (ps *ParameterStore) parameterName(envName string) string {
+func (ps *ParameterStore) nameWithPath(envName string) string {
 	return filepath.Join(ps.path, envName)
 }
 
-func envName(paramName string) string {
+func nameWithoutPath(paramName string) string {
 	return filepath.Base(paramName)
 }
