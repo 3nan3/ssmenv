@@ -11,12 +11,14 @@ func TestPrintAll(t *testing.T) {
 		"VAR_A": toPtr(`value`),
 		"VAR_B": toPtr(`"value"`),
 		"VAR_C": toPtr(`va lue`),
-		"VAR_D": toPtr("va\nlue"),
-		"VAR_E": toPtr(`{
+		"VAR_D": toPtr(`va$lue`),
+		"VAR_E": toPtr("va\nlue"),
+		"VAR_F": toPtr(`{
   "a": "v",
   "b": "ABC\nDEF\n"
+  "c": "$VAR"
 }`),
-		"VAR_F": nil,
+		"VAR_G": nil,
 	}
 	envs := New()
 	for n, v := range vars {
@@ -30,13 +32,15 @@ func TestPrintAll(t *testing.T) {
 `VAR_A=value
 VAR_B=\"value\"
 VAR_C="va lue"
-VAR_D="va
+VAR_D=va\$lue
+VAR_E="va
 lue"
-VAR_E="{
+VAR_F="{
   \"a\": \"v\",
   \"b\": \"ABC\nDEF\n\"
+  \"c\": \"\$VAR\"
 }"
-VAR_F=
+VAR_G=
 `
 	assert.Equal(t, expected, io.String())
 }
