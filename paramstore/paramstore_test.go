@@ -34,6 +34,10 @@ func (mocksvc *MockSSMAPI) PutParameter(input *ssm.PutParameterInput) (*ssm.PutP
     return args.Get(0).(*ssm.PutParameterOutput), args.Error(1)
 }
 
+func (mocksvc *MockSSMAPI) DeleteParameters(input *ssm.DeleteParametersInput) (*ssm.DeleteParametersOutput, error) {
+    args := mocksvc.Called(input)
+    return args.Get(0).(*ssm.DeleteParametersOutput), args.Error(1)
+}
 
 func TestGetEnv(t *testing.T) {
 	emptyPattern := "empty"
@@ -183,6 +187,26 @@ func TestPutEnvs(t *testing.T) {
 	}
 	_, err := ps.PutEnvs(envs)
 	assert.Nil(t, err)
+}
+
+func TestDeleteEnvs(t *testing.T) {
+	emptyPattern := "empty"
+	ps := New("/path", emptyPattern)
+
+	mocksvc := new(MockSSMAPI)
+	output := &ssm.DeleteParametersOutput{
+		DeletedParameters: []*string{aws.String("VAR_A"), aws.String("VAR_B")},
+	}
+	mocksvc.On("DeleteParameters", mock.Anything).Return(output, nil)
+	ps.svc = mocksvc
+
+	deleted := []string{"VAR_A", "VAR_B", "VAR_C"}
+	actuals, err := ps.DeleteEnvs(deleted)
+
+	expecteds := []string{"VAR_A", "VAR_B"}
+	if assert.Nil(t, err) {
+		assert.ElementsMatch(t, expecteds, actuals)
+	}
 }
 
 func TestPutParamsInEnvs(t *testing.T) {
