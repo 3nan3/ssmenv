@@ -4,6 +4,7 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ssm"
 	"github.com/aws/aws-sdk-go/service/ssm/ssmiface"
@@ -24,6 +25,15 @@ func (mocksvc *MockSSMAPI) GetParametersByPath(input *ssm.GetParametersByPathInp
     args := mocksvc.Called(input)
     return args.Get(0).(*ssm.GetParametersByPathOutput), args.Error(1)
 }
+
+func (mocksvc *MockSSMAPI) PutParameter(input *ssm.PutParameterInput) (*ssm.PutParameterOutput, error) {
+    args := mocksvc.Called(input)
+    if args.Get(0) == nil {
+	    return nil, args.Error(1)
+    }
+    return args.Get(0).(*ssm.PutParameterOutput), args.Error(1)
+}
+
 
 func TestGetEnv(t *testing.T) {
 	emptyPattern := "empty"
@@ -120,6 +130,59 @@ func TestGetEnvs(t *testing.T) {
 			assert.Equal(t, expected, envs.GetEnv(name))
 		}
 	}
+}
+
+func TestPutEnvs(t *testing.T) {
+	emptyPattern := "empty"
+	ps := New("/path", emptyPattern)
+
+	mocksvc := new(MockSSMAPI)
+
+	// Set the currently stored value
+	mocksvc.On("GetParametersByPath", mock.Anything).Return(
+		&ssm.GetParametersByPathOutput{
+			Parameters: []*ssm.Parameter{
+				&ssm.Parameter{Name: aws.String("VAR_B"), Value: aws.String("value_b")},
+				&ssm.Parameter{Name: aws.String("VAR_C"), Value: aws.String("value_cc")},
+				&ssm.Parameter{Name: aws.String("VAR_D"), Value: aws.String(emptyPattern)},
+			},
+		},
+		nil,
+	)
+
+	// Mock values to store this time
+	mocks := map[string]string{
+		"VAR_A": "value_a",
+		//"VAR_B": "value_b", This value has not changed
+		"VAR_C": "value_cc",
+		"VAR_D": "value_d",
+		"VAR_E": emptyPattern,
+	}
+	for n, v := range mocks {
+		input := &ssm.PutParameterInput {
+			Name: aws.String(ps.nameWithPath(n)),
+			Overwrite: aws.Bool(true),
+			Type: aws.String("SecureString"),
+			Value: aws.String(v),
+		}
+		mocksvc.On("PutParameter", input).Return(nil, nil)
+	}
+	mocksvc.On("PutParameter", mock.Anything).Return(nil, fmt.Errorf("PutParameter was called with invalid input"))
+	ps.svc = mocksvc
+
+	stored := map[string]string{
+		"VAR_A": "value_a",
+		"VAR_B": "value_b",
+		"VAR_C": "value_cc",
+		"VAR_D": "value_d",
+		"VAR_E": "",
+	}
+	envs := env.New()
+	for n, v := range stored {
+		envs.PutEnv(n, &v)
+	}
+	_, err := ps.PutEnvs(envs)
+	assert.Nil(t, err)
 }
 
 func TestPutParamsInEnvs(t *testing.T) {
