@@ -75,6 +75,9 @@ func (ps *ParameterStore) PutEnvs(envs *env.Env) (*env.Env, error) {
 		return nil, err
 	}
 	for name, value := range envs.GetEnvs() {
+		if value == nil || (oldenvs.GetEnv(name) != nil && *value == *oldenvs.GetEnv(name)) {
+			continue
+		}
 		if *value == "" {
 			empty := ps.emptyPattern
 			value = &empty
